@@ -23,11 +23,17 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
     print(f"Processing Chapter {chapter_number}")
 
     # Create tasks for both API calls
-    claude_task = asyncio.create_task(process_claude_summary(chapter_text, chapter_number))
-    chatgpt_task = asyncio.create_task(process_chatgpt_fields(assistant_id, chapter_text, chapter_number, current_data))
+    claude_task = asyncio.create_task(
+        process_claude_summary(chapter_text, chapter_number)
+    )
+    chatgpt_task = asyncio.create_task(
+        process_chatgpt_fields(assistant_id, chapter_text, chapter_number, current_data)
+    )
 
     # Wait for both tasks to complete
-    claude_result, chatgpt_function_calls = await asyncio.gather(claude_task, chatgpt_task)
+    claude_result, chatgpt_function_calls = await asyncio.gather(
+        claude_task, chatgpt_task
+    )
 
     # Process Claude's chapter summary
     current_data["chapter_summaries"].append(claude_result)
@@ -50,7 +56,9 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
                         break
             elif function_name == "delete_character":
                 result = delete_character(**arguments)
-                current_data["characters"] = [c for c in current_data["characters"] if c["name"] != result["name"]]
+                current_data["characters"] = [
+                    c for c in current_data["characters"] if c["name"] != result["name"]
+                ]
 
             elif function_name == "create_location":
                 result = create_location(**arguments)
@@ -63,7 +71,9 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
                         break
             elif function_name == "delete_location":
                 result = delete_location(**arguments)
-                current_data["locations"] = [l for l in current_data["locations"] if l["name"] != result["name"]]
+                current_data["locations"] = [
+                    l for l in current_data["locations"] if l["name"] != result["name"]
+                ]
 
             elif function_name == "create_plot_point":
                 result = create_plot_point(**arguments)
@@ -71,13 +81,22 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
             elif function_name == "update_plot_point":
                 result = update_plot_point(**arguments)
                 for i, plot in enumerate(current_data["plot"]):
-                    if plot["chapter"] == result["chapter"] and plot["event"] == result["event"]:
+                    if (
+                        plot["chapter"] == result["chapter"]
+                        and plot["event"] == result["event"]
+                    ):
                         current_data["plot"][i].update(result["updates"])
                         break
             elif function_name == "delete_plot_point":
                 result = delete_plot_point(**arguments)
-                current_data["plot"] = [p for p in current_data["plot"] if
-                                        not (p["chapter"] == result["chapter"] and p["event"] == result["event"])]
+                current_data["plot"] = [
+                    p
+                    for p in current_data["plot"]
+                    if not (
+                        p["chapter"] == result["chapter"]
+                        and p["event"] == result["event"]
+                    )
+                ]
 
             elif function_name == "create_theme":
                 result = create_theme(**arguments)
@@ -90,7 +109,9 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
                         break
             elif function_name == "delete_theme":
                 result = delete_theme(**arguments)
-                current_data["themes"] = [t for t in current_data["themes"] if t["name"] != result["name"]]
+                current_data["themes"] = [
+                    t for t in current_data["themes"] if t["name"] != result["name"]
+                ]
 
             elif function_name == "create_unresolved_mystery":
                 result = create_unresolved_mystery(**arguments)
@@ -99,12 +120,17 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
                 result = update_unresolved_mystery(**arguments)
                 for i, mystery in enumerate(current_data["unresolved_mysteries"]):
                     if mystery["description"] == result["description"]:
-                        current_data["unresolved_mysteries"][i].update(result["updates"])
+                        current_data["unresolved_mysteries"][i].update(
+                            result["updates"]
+                        )
                         break
             elif function_name == "delete_unresolved_mystery":
                 result = delete_unresolved_mystery(**arguments)
-                current_data["unresolved_mysteries"] = [m for m in current_data["unresolved_mysteries"] if
-                                                        m["description"] != result["description"]]
+                current_data["unresolved_mysteries"] = [
+                    m
+                    for m in current_data["unresolved_mysteries"]
+                    if m["description"] != result["description"]
+                ]
 
             elif function_name == "create_key_item":
                 result = create_key_item(**arguments)
@@ -117,7 +143,9 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
                         break
             elif function_name == "delete_key_item":
                 result = delete_key_item(**arguments)
-                current_data["key_items"] = [i for i in current_data["key_items"] if i["name"] != result["name"]]
+                current_data["key_items"] = [
+                    i for i in current_data["key_items"] if i["name"] != result["name"]
+                ]
 
             elif function_name == "update_narrative_style":
                 result = update_narrative_style(**arguments)
@@ -134,7 +162,9 @@ async def process_chapter(assistant_id, chapter_text, chapter_number):
                         break
             elif function_name == "delete_entity":
                 result = delete_entity(**arguments)
-                current_data["entities"] = [e for e in current_data["entities"] if e["name"] != result["name"]]
+                current_data["entities"] = [
+                    e for e in current_data["entities"] if e["name"] != result["name"]
+                ]
 
         except TypeError as e:
             print(f"TypeError in {function_name}: {e}")
@@ -158,10 +188,14 @@ async def process_claude_summary(chapter_text, chapter_number):
     return {"chapter": chapter_number, "summary": summary}
 
 
-async def process_chatgpt_fields(assistant_id, chapter_text, chapter_number, current_data):
+async def process_chatgpt_fields(
+    assistant_id, chapter_text, chapter_number, current_data
+):
     chatgpt_data = current_data.copy()
     chatgpt_data.pop("chapter_summaries", None)
-    function_calls = await process_with_chatgpt(assistant_id, chapter_text, chapter_number, chatgpt_data)
+    function_calls = await process_with_chatgpt(
+        assistant_id, chapter_text, chapter_number, chatgpt_data
+    )
 
     # Correct the typo
     for call in function_calls:
@@ -169,6 +203,7 @@ async def process_chatgpt_fields(assistant_id, chapter_text, chapter_number, cur
             call["arguments"]["significance"] = call["arguments"].pop("signficance")
 
     return function_calls
+
 
 async def process_all_chapters():
     assistant_id = "asst_BYdqyXTxZ8C5LC5AoJCqpEin"
@@ -182,7 +217,3 @@ async def process_all_chapters():
             print("sleeping for 60 seconds...")
             time.sleep(60)
             print("awake. beginning chapter " + str(chapter_number + 1))
-
-
-
-

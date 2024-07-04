@@ -8,7 +8,6 @@ prompts = {
 
     Return only the JSON structure, nothing else.
     """,
-
     "characters": f"""
     Update the characters data based on Chapter {{chapter_number}}. Add new characters or modify existing ones as necessary.
     For each character, provide:
@@ -30,7 +29,6 @@ prompts = {
 
     Return only the JSON structure, nothing else.
     """,
-
     "locations": f"""
     Update the locations data based on Chapter {{chapter_number}}. Add new locations or modify existing ones as necessary.
     Return the updated locations data as a JSON array of location objects.
@@ -43,7 +41,6 @@ prompts = {
 
     Return only the JSON structure, nothing else.
     """,
-
     "plot": f"""
     Update the plot data based on Chapter {{chapter_number}}. Focus on major events and developments that significantly impact the story.
 
@@ -65,7 +62,6 @@ prompts = {
 
     Return only the JSON structure, nothing else.
     """,
-
     "themes": f"""
     Update the themes data based on Chapter {{chapter_number}}. Add new themes or modify existing ones as necessary.
     Return the updated themes data as a JSON array of theme objects.
@@ -78,7 +74,6 @@ prompts = {
 
     Return only the JSON structure, nothing else.
     """,
-
     "unresolved_mysteries": f"""
     Update the unresolved mysteries data based on Chapter {{chapter_number}} ONLY if there are significant, story-relevant mysteries introduced or resolved. This section should be updated sparingly and only for major plot-related mysteries.
     
@@ -100,7 +95,6 @@ prompts = {
     
     Return only the JSON structure, nothing else. If no updates are necessary, return the current data unchanged.
     """,
-
     "key_items": f"""
     Update the key items data based on Chapter {{chapter_number}}. Add new items, modify existing ones, or update their status as necessary.
     Return the updated key items data as a JSON array of item objects.
@@ -113,7 +107,6 @@ prompts = {
 
     Return only the JSON structure, nothing else.
     """,
-
     "narrative_style": f"""
     Update the narrative style data based on Chapter {{chapter_number}}. Modify the existing style information or add new details as necessary.
     Return the updated narrative style data as a JSON object.
@@ -126,7 +119,6 @@ prompts = {
 
     Return only the JSON structure, nothing else.
     """,
-
     "entities": f"""
     Update the entities data based on Chapter {{chapter_number}}. Entities should ONLY include nations, organizations, businesses, and similar large-scale groups. DO NOT include individual people or objects.
 
@@ -149,7 +141,7 @@ prompts = {
     {{chapter_text}}
 
     Return only the JSON structure, nothing else.
-    """
+    """,
 }
 
 pre_prompt_gpt = """
@@ -223,7 +215,7 @@ Remember:
 Provide only the summary in your response, with no additional text, explanations, or meta-commentary. Your summary should begin immediately and end at exactly 150 words.
 """
 
-chapter_planner_prompt="""You are a skilled novelist and story planner, specializing in maintaining consistent pacing and style across a long-form narrative. Your task is to create a concise plan for the next 10 chapters of a novel based on the provided story information.
+chapter_planner_prompt = """You are a skilled novelist and story planner, specializing in maintaining consistent pacing and style across a long-form narrative. Your task is to create a concise plan for the next 10 chapters of a novel based on the provided story information.
 
 Key Instructions:
 1. Analyze the pacing, style, and narrative structure of the existing chapters.

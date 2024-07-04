@@ -1,10 +1,10 @@
 import json
 import asyncio
 import os
+from anthropic_api import generate_chapter_claude
 from chapter_planner import create_plan_prompt, generate_chapter_plan
-from generate_chapter import create_chapter_prompt, generate_chapter_gpt4, generate_chapter_claude
+from prompts_and_functions.chapter_prompt_generator import create_chapter_prompt
 from process_chapters import process_chapter
-from openai_api import create_assistant
 
 
 async def generate_and_process_chapters(start_chapter, num_chapters, use_planner=True):
@@ -13,7 +13,9 @@ async def generate_and_process_chapters(start_chapter, num_chapters, use_planner
     if use_planner:
         # Generate chapter plan
         story_data = load_story_data()
-        prompt = create_plan_prompt(story_data, start_chapter, start_chapter + num_chapters - 1)
+        prompt = create_plan_prompt(
+            story_data, start_chapter, start_chapter + num_chapters - 1
+        )
         plan = await generate_chapter_plan(prompt)
         chapter_plan = json.loads(plan)
     else:
@@ -28,13 +30,19 @@ async def generate_and_process_chapters(start_chapter, num_chapters, use_planner
         # Generate chapter
         story_data = load_story_data()
         prompt = create_chapter_prompt(story_data, chapter_number)
-        prompt = "The following JSON is what the following chapter is to be composed of. Follow it closely\n" + str(chapter_plan[chapter_number - start_chapter]) + prompt
+        prompt = (
+            "The following JSON is what the following chapter is to be composed of. Follow it closely\n"
+            + str(chapter_plan[chapter_number - start_chapter])
+            + prompt
+        )
         print(prompt)
         claude_chapter = await generate_chapter_claude(prompt)
 
         # Save generated chapters
         os.makedirs("chapters", exist_ok=True)
-        with open(f"chapters/chapter_{chapter_number}_claude.txt", "w", encoding="utf-8") as f:
+        with open(
+            f"chapters/chapter_{chapter_number}_claude.txt", "w", encoding="utf-8"
+        ) as f:
             f.write(claude_chapter)
 
         print(f"Chapter {chapter_number} generated and saved.")
@@ -53,7 +61,9 @@ def load_story_data():
 async def main():
     start_chapter = 20  # Adjust this to your current chapter number
     num_chapters = 10  # Number of chapters to generate and process
-    use_planner = False  # Set to False if you don't want to use the chapter planner
+    use_planner = (
+        False  # Set to False if you want to use a planner you have already generated
+    )
 
     await generate_and_process_chapters(start_chapter, num_chapters, use_planner)
 

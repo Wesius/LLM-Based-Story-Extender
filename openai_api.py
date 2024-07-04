@@ -10,16 +10,20 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
+
 def create_assistant():
     assistant = openai_client.beta.assistants.create(
         name="Story Analyzer",
         instructions=pre_prompt_gpt,
         model="gpt-4o-2024-05-13",
-        tools=llm_functions
+        tools=llm_functions,
     )
     return assistant.id
 
-async def process_with_chatgpt(assistant_id, chapter_text, chapter_number, current_data):
+
+async def process_with_chatgpt(
+    assistant_id, chapter_text, chapter_number, current_data
+):
     print(f"Processing chapter {chapter_number}...")
 
     print("Creating thread...")
@@ -36,16 +40,16 @@ async def process_with_chatgpt(assistant_id, chapter_text, chapter_number, curre
 
     print("Creating run...")
     run = await openai_client.beta.threads.runs.create(
-        thread_id=thread.id,
-        assistant_id=assistant_id,
-        instructions=pre_prompt_gpt
+        thread_id=thread.id, assistant_id=assistant_id, instructions=pre_prompt_gpt
     )
     print(f"Run created with ID: {run.id}")
 
     function_calls = []
 
     while True:
-        run = await openai_client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+        run = await openai_client.beta.threads.runs.retrieve(
+            thread_id=thread.id, run_id=run.id
+        )
 
         if run.status == "completed":
             break
@@ -61,34 +65,40 @@ async def process_with_chatgpt(assistant_id, chapter_text, chapter_number, curre
 
             for tool_call in tool_calls:
                 print(f"Processing tool call: {tool_call.function.name}")
-                function_calls.append({
-                    "name": tool_call.function.name,
-                    "arguments": json.loads(tool_call.function.arguments)
-                })
+                function_calls.append(
+                    {
+                        "name": tool_call.function.name,
+                        "arguments": json.loads(tool_call.function.arguments),
+                    }
+                )
 
-                tool_outputs.append({
-                    "tool_call_id": tool_call.id,
-                    "output": json.dumps({"status": "acknowledged"})
-                })
+                tool_outputs.append(
+                    {
+                        "tool_call_id": tool_call.id,
+                        "output": json.dumps({"status": "acknowledged"}),
+                    }
+                )
 
             print("Submitting tool outputs...")
             run = await openai_client.beta.threads.runs.submit_tool_outputs(
-                thread_id=thread.id,
-                run_id=run.id,
-                tool_outputs=tool_outputs
+                thread_id=thread.id, run_id=run.id, tool_outputs=tool_outputs
             )
 
     print(f"Run completed. Total function calls: {len(function_calls)}")
     return function_calls
 
+
 async def generate_chapter_gpt4(prompt):
     response = await openai_client.chat.completions.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "You are a skilled author, tasked with continuing a novel based on the provided story information."},
-            {"role": "user", "content": prompt}
+            {
+                "role": "system",
+                "content": "You are a skilled author, tasked with continuing a novel based on the provided story information.",
+            },
+            {"role": "user", "content": prompt},
         ],
         max_tokens=4000,
-        temperature=0.7
+        temperature=0.7,
     )
     return response.choices[0].message.content
